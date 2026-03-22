@@ -78,7 +78,7 @@
             resultBlock.classList.add('hidden');
 
             try {
-                // ТЕПЕРЬ ЗАПРОС ИДЕТ НА ТВОЙ ВЕРСЕЛЬ-СЕРВЕР, А НЕ В ЯНДЕКС НАПРЯМУЮ
+                // ВАЖНО: Запрос идет на твой бэкенд Vercel
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: {
@@ -87,21 +87,24 @@
                     body: JSON.stringify({ text: text })
                 });
 
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error || `HTTP ${response.status}`);
+                const data = await response.json();
+
+                // Проверяем, нет ли ошибки от сервера
+                if (data.error) {
+                    throw new Error(data.error);
                 }
 
-                const data = await response.json();
-                
-                // Достаем текст ответа из структуры Yandex GPT
-                const result = data.result.alternatives[0].message.text;
-                
-                aiResponse.innerHTML = result;
-                resultBlock.classList.remove('hidden');
+                // Безопасно достаем текст из ответа Яндекса
+                if (data.result && data.result.alternatives && data.result.alternatives[0]) {
+                    const result = data.result.alternatives[0].message.text;
+                    aiResponse.innerHTML = result;
+                    resultBlock.classList.remove('hidden');
+                } else {
+                    throw new Error('Некорректный ответ от нейросети');
+                }
 
             } catch (error) {
-                console.error(error);
+                console.error('Ошибка:', error);
                 alert('Ошибка: ' + error.message);
             } finally {
                 analyzeBtn.innerHTML = '<span>🔍</span> РАЗОБРАТЬ ССОРУ';
