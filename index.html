@@ -17,40 +17,31 @@
     <div id="result" class="result hidden"></div>
 
     <script>
-        async function analyze() {
+        function analyze() {
             const text = document.getElementById('chat').value;
             if (!text) return alert('Вставь текст');
-            const btn = document.querySelector('button');
-            btn.innerText = 'Анализирую...';
-            btn.disabled = true;
 
-            try {
-                // Используем публичный API (без ключа, но с ограничением)
-                const response = await fetch('https://api-inference.huggingface.co/models/facebook/bart-large-mnli', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        inputs: text,
-                        parameters: { candidate_labels: ["агрессия", "манипуляция", "уважение", "любовь"] }
-                    })
-                });
-                const data = await response.json();
-                let verdict = '🔍 Не удалось определить.';
-                if (data.scores) {
-                    const top = data.labels[0];
-                    if (top === 'агрессия') verdict = '🔴 Красный флаг: агрессия!';
-                    else if (top === 'манипуляция') verdict = '🟠 Манипуляция в переписке.';
-                    else if (top === 'уважение') verdict = '🟢 Есть уважение.';
-                    else verdict = '🤷‍♂️ Сложно сказать.';
-                }
-                document.getElementById('result').innerHTML = `<strong>Вердикт:</strong><br>${verdict}`;
-                document.getElementById('result').classList.remove('hidden');
-            } catch(e) {
-                alert('Ошибка: ' + e.message);
-            } finally {
-                btn.innerText = 'Разобрать';
-                btn.disabled = false;
-            }
+            let result = '';
+            const lower = text.toLowerCase();
+
+            // Простейший анализ по словам
+            const aggressive = ['ты дурак', 'идиот', 'заткнись', 'тупой', 'ненавижу', 'бесишь', 'сволочь'];
+            const manipulative = ['если ты', 'ты должен', 'нормальные люди', 'никто не', 'все так делают'];
+            const defensive = ['неправда', 'ты придираешься', 'я не виноват', 'отстань'];
+
+            let aggrCount = 0, manipCount = 0, defCount = 0;
+            for (let word of aggressive) if (lower.includes(word)) aggrCount++;
+            for (let word of manipulative) if (lower.includes(word)) manipCount++;
+            for (let word of defensive) if (lower.includes(word)) defCount++;
+
+            if (aggrCount > 2) result = '🔴 Красный флаг: явная агрессия.';
+            else if (manipCount > 2) result = '🟠 Манипуляция. Кто-то давит на чувства.';
+            else if (defCount > 2) result = '🟡 Защитная реакция. Один из вас оправдывается, вместо диалога.';
+            else if (aggrCount === 0 && manipCount === 0 && defCount === 0) result = '🟢 Вроде конструктивно.';
+            else result = '🤔 Есть напряжённость, но сложно сказать однозначно.';
+
+            document.getElementById('result').innerHTML = `<strong>Вердикт:</strong><br>${result}`;
+            document.getElementById('result').classList.remove('hidden');
         }
     </script>
 </body>
