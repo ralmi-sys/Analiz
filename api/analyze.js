@@ -1,7 +1,12 @@
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-    
+    // Разрешаем только POST запросы
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     const { text } = req.body;
+
+    // Твои данные из логов и скриншотов
     const YANDEX_API_KEY = 'AQVN2wvalDIjnYXVg78YcnTU1kKTItrR9CZv8BwP'; 
     const YANDEX_FOLDER_ID = 'b1gja43n76195j2h9e76';
 
@@ -14,23 +19,32 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 modelUri: `gpt://${YANDEX_FOLDER_ID}/yandexgpt-lite`,
-                completionOptions: { temperature: 0.6, maxTokens: 1000 },
+                completionOptions: {
+                    stream: false,
+                    temperature: 0.7,
+                    maxTokens: 1000
+                },
                 messages: [
-                    { role: "system", text: "Ты — дерзкий ИИ-судья. Разбери ссору, определи агрессора и кто прав. Пиши кратко и с эмодзи." },
-                    { role: "user", text: text }
+                    {
+                        role: "system",
+                        text: "Ты — дерзкий и справедливый ИИ-судья. Тебе присылают текст ссоры. Твоя задача: быстро разобрать ситуацию, найти агрессора, указать на манипуляции и сказать, кто прав. Пиши коротко, по фактам и используй эмодзи. Стиль: киберпанк/хакер."
+                    },
+                    {
+                        role: "user",
+                        text: text
+                    }
                 ]
             })
         });
 
         const data = await response.json();
 
-        // Если Яндекс вернул ошибку, мы передадим её на фронтенд
-        if (!data.result) {
-            return res.status(500).json({ error: data.message || "Ошибка Yandex API" });
+        if (!response.ok) {
+            return res.status(response.status).json({ error: data.message || 'Ошибка Яндекса' });
         }
 
         return res.status(200).json(data);
-    } catch (e) {
-        return res.status(500).json({ error: e.message });
+    } catch (error) {
+        return res.status(500).json({ error: 'Ошибка сервера: ' + error.message });
     }
 }
