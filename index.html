@@ -61,11 +61,6 @@
     </div>
 
     <script>
-        // ========== ТВОИ ДАННЫЕ (ВСТАВЛЕНЫ) ==========
-        const YANDEX_API_KEY = 'AQVN2wvalDIjnYXVg78YcnTU1kKTItrR9CZv8BwP';   // твой ключ
-        const YANDEX_FOLDER_ID = 'b1gja43n76195j2h9e76';                     // твой folder id
-        // ===============================================
-
         const analyzeBtn = document.getElementById('analyzeBtn');
         const chatInput = document.getElementById('chatInput');
         const resultBlock = document.getElementById('resultBlock');
@@ -83,50 +78,31 @@
             resultBlock.classList.add('hidden');
 
             try {
-                const url = 'https://llm.api.cloud.yandex.net/foundationModels/v1/completion';
-                const prompt = `Ты — беспристрастный ИИ-конфликтолог. Проанализируй эту переписку.
-Выдели, кто ведет себя агрессивно, есть ли манипуляции, кто прав с точки зрения здоровых отношений.
-Дай короткий, дерзкий, но справедливый ответ. Используй эмодзи.
-Текст: ${text}`;
-
-                const body = {
-                    modelUri: `gpt://${YANDEX_FOLDER_ID}/yandexgpt-lite`,
-                    completionOptions: {
-                        stream: false,
-                        temperature: 0.7,
-                        maxTokens: 300
-                    },
-                    messages: [
-                        { role: "user", text: prompt }
-                    ]
-                };
-
-                const response = await fetch(url, {
+                // ТЕПЕРЬ ЗАПРОС ИДЕТ НА ТВОЙ ВЕРСЕЛЬ-СЕРВЕР, А НЕ В ЯНДЕКС НАПРЯМУЮ
+                const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Api-Key ${YANDEX_API_KEY}`
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(body)
+                    body: JSON.stringify({ text: text })
                 });
 
                 if (!response.ok) {
                     const err = await response.json();
-                    throw new Error(err.message || `HTTP ${response.status}`);
+                    throw new Error(err.error || `HTTP ${response.status}`);
                 }
 
                 const data = await response.json();
+                
+                // Достаем текст ответа из структуры Yandex GPT
                 const result = data.result.alternatives[0].message.text;
+                
                 aiResponse.innerHTML = result;
                 resultBlock.classList.remove('hidden');
 
             } catch (error) {
                 console.error(error);
-                let errorMsg = error.message;
-                if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) errorMsg = 'Неверный API-ключ. Проверь.';
-                if (errorMsg.includes('403')) errorMsg = 'Нет доступа к Yandex GPT. Убедись, что у сервисного аккаунта есть роль ai.languageModels.user.';
-                if (errorMsg.includes('billing')) errorMsg = 'Нет активного биллинга. Подключи карту (деньги не спишут).';
-                alert('Ошибка: ' + errorMsg);
+                alert('Ошибка: ' + error.message);
             } finally {
                 analyzeBtn.innerHTML = '<span>🔍</span> РАЗОБРАТЬ ССОРУ';
                 analyzeBtn.disabled = false;
