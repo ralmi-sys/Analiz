@@ -3,114 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Судья | Разбор ссор</title>
+    <title>AI СУДЬЯ | СИСТЕМА АНАЛИЗА</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at 10% 20%, #0a0f1e, #03050b); }
-        .glass-card { background: rgba(15, 25, 45, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(139, 92, 246, 0.3); }
-        .neon-glow { box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); transition: all 0.2s ease; }
-        .neon-glow:focus { box-shadow: 0 0 25px rgba(139, 92, 246, 0.8); border-color: #a855f7; }
-        .btn-primary { background: linear-gradient(95deg, #8b5cf6, #ec489a); transition: transform 0.1s ease; }
-        .btn-primary:active { transform: scale(0.97); }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade { animation: fadeInUp 0.4s ease-out; }
-        .result-card { background: rgba(0, 0, 0, 0.6); border-left: 4px solid #8b5cf6; }
+        body {
+            background-color: #050505;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .cyber-card {
+            background: rgba(10, 10, 15, 0.9);
+            border: 1px solid #bc13fe;
+            box-shadow: 0 0 15px rgba(188, 19, 254, 0.2);
+        }
+        .neon-border:focus {
+            border-color: #ff00ff;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        }
+        .btn-cyber {
+            background: linear-gradient(45deg, #bc13fe, #ff00ff);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+        }
+        .btn-cyber:hover {
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.6);
+            transform: scale(1.02);
+        }
+        .loading-bar {
+            width: 0%;
+            height: 2px;
+            background: #ff00ff;
+            box-shadow: 0 0 10px #ff00ff;
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4 md:p-10">
 
-    <div class="w-full max-w-2xl glass-card rounded-2xl p-5 md:p-8 transition-all duration-300 neon-glow">
-        <div class="text-center mb-6">
-            <div class="inline-block p-2 rounded-full bg-purple-500/20 backdrop-blur-sm mb-2">
-                <span class="text-4xl">⚖️</span>
-            </div>
-            <h1 class="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-                AI Судья
+    <div class="max-w-2xl w-full cyber-card rounded-lg p-6 md:p-8 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50"></div>
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-5xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 mb-2">
+                AI JUDGE v1.0
             </h1>
-            <p class="text-gray-400 text-sm mt-2">Беспристрастный разбор ваших ссор</p>
-        </div>
+            <p class="text-xs tracking-[0.3em] text-purple-400 uppercase">Система беспристрастного анализа конфликтов</p>
+        </header>
 
-        <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-300 mb-2 tracking-wide">📝 ВСТАВЬТЕ ТЕКСТ ПЕРЕПИСКИ</label>
-            <textarea id="chatInput" rows="7" 
-                class="w-full bg-black/40 border border-purple-500/40 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all resize-none"
-                placeholder='Пример:
-Она: Ты заебал меня
-Он: Сама дура
-Она: Ты всегда так, иди нахуй'></textarea>
-        </div>
-
-        <button id="analyzeBtn" 
-            class="btn-primary w-full py-4 rounded-xl font-bold text-white text-lg shadow-xl flex items-center justify-center gap-2 transition-all">
-            <span>🔍</span> РАЗОБРАТЬ ССОРУ
-        </button>
-
-        <div id="resultBlock" class="hidden mt-8 animate-fade">
-            <div class="result-card rounded-xl p-5">
-                <h3 class="text-xl font-bold text-purple-300 mb-3 flex items-center gap-2">
-                    <span>🤖</span> Вердикт ИИ
-                </h3>
-                <div id="aiResponse" class="text-gray-200 leading-relaxed text-base whitespace-pre-line"></div>
+        <div class="space-y-6">
+            <div>
+                <label class="block text-xs font-bold text-purple-300 mb-2 uppercase tracking-widest">Входные данные (переписка):</label>
+                <textarea id="chatInput" rows="6" 
+                    class="w-full bg-black/60 border border-purple-900/50 rounded p-4 text-purple-100 placeholder-purple-900/50 focus:outline-none neon-border transition-all"
+                    placeholder="Вставь сюда лог ссоры..."></textarea>
             </div>
-        </div>
 
-        <div class="mt-6 text-center text-xs text-gray-500">
-            ⚡ Работает на Yandex GPT • Анонимно • Не храним данные
+            <button id="submitBtn" class="btn-cyber w-full py-4 rounded font-black text-white">
+                Запустить анализ
+            </button>
+
+            <div id="loader" class="hidden">
+                <div class="w-full bg-purple-900/20 h-[2px] mb-2">
+                    <div id="bar" class="loading-bar"></div>
+                </div>
+                <p class="text-center text-[10px] text-purple-400 animate-pulse uppercase tracking-widest">Обработка нейросетью...</p>
+            </div>
+
+            <div id="resultWrapper" class="hidden space-y-4">
+                <div class="h-px bg-purple-900/50"></div>
+                <h2 class="text-sm font-bold text-pink-500 uppercase tracking-widest">Вердикт системы:</h2>
+                <div id="aiResponse" class="bg-purple-950/20 border-l-2 border-pink-600 p-4 italic text-gray-200 leading-relaxed whitespace-pre-wrap text-sm md:text-base">
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const chatInput = document.getElementById('chatInput');
-        const resultBlock = document.getElementById('resultBlock');
+        const btn = document.getElementById('submitBtn');
+        const input = document.getElementById('chatInput');
+        const resultWrapper = document.getElementById('resultWrapper');
         const aiResponse = document.getElementById('aiResponse');
+        const loader = document.getElementById('loader');
+        const bar = document.getElementById('bar');
 
-        analyzeBtn.addEventListener('click', async () => {
-            const text = chatInput.value.trim();
-            if (!text) {
-                alert('Вставьте текст переписки!');
-                return;
-            }
+        btn.onclick = async () => {
+            const text = input.value.trim();
+            if (!text) return alert('Система требует данные для анализа!');
 
-            analyzeBtn.innerHTML = '<span>⏳</span> АНАЛИЗИРУЮ...';
-            analyzeBtn.disabled = true;
-            resultBlock.classList.add('hidden');
+            // Сброс и запуск анимации
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            resultWrapper.classList.add('hidden');
+            loader.classList.remove('hidden');
+            bar.style.width = '100%';
+            bar.style.transition = 'width 2s ease-in-out';
 
             try {
-                // ВАЖНО: Запрос идет на твой бэкенд Vercel
+                // Запрос идет на твой собственный API на Vercel
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: text })
                 });
 
                 const data = await response.json();
 
-                // Проверяем, нет ли ошибки от сервера
-                if (data.error) {
-                    throw new Error(data.error);
-                }
+                if (!response.ok) throw new Error(data.error || 'Ошибка доступа');
 
-                // Безопасно достаем текст из ответа Яндекса
-                if (data.result && data.result.alternatives && data.result.alternatives[0]) {
-                    const result = data.result.alternatives[0].message.text;
-                    aiResponse.innerHTML = result;
-                    resultBlock.classList.remove('hidden');
-                } else {
-                    throw new Error('Некорректный ответ от нейросети');
-                }
-
-            } catch (error) {
-                console.error('Ошибка:', error);
-                alert('Ошибка: ' + error.message);
+                // Парсим текст ответа
+                const finalResult = data.result.alternatives[0].message.text;
+                
+                aiResponse.innerText = finalResult;
+                resultWrapper.classList.remove('hidden');
+                
+            } catch (err) {
+                alert('КРИТИЧЕСКИЙ СБОЙ: ' + err.message);
             } finally {
-                analyzeBtn.innerHTML = '<span>🔍</span> РАЗОБРАТЬ ССОРУ';
-                analyzeBtn.disabled = false;
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                loader.classList.add('hidden');
+                bar.style.width = '0%';
+                bar.style.transition = 'none';
             }
-        });
+        };
     </script>
 </body>
 </html>
